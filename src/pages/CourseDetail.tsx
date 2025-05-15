@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -466,7 +466,7 @@ const CourseDetail = () => {
         toast({
           title: "Exercise Completed!",
           description: "You've successfully completed this exercise.",
-          variant: "success",
+          variant: "default", // Changed from "success" to "default"
         });
       } else {
         setOutput(prev => prev + "✗ Your solution doesn't match the expected output. Try again!\n");
