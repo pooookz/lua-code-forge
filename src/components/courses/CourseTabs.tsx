@@ -10,7 +10,7 @@ interface CourseTabsProps {
 const CourseTabs = ({ filteredCourses }: CourseTabsProps) => {
   return (
     <Tabs defaultValue="all" className="mb-8">
-      <TabsList>
+      <TabsList className="w-full flex flex-wrap justify-start gap-1">
         <TabsTrigger value="all">All Courses</TabsTrigger>
         <TabsTrigger value="fundamentals">Fundamentals</TabsTrigger>
         <TabsTrigger value="gamedev">Game Development</TabsTrigger>

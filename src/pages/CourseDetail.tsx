@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCheck, Play, SendHorizontal } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Sample course data - in a real app this would come from an API
 const coursesData = {
@@ -395,6 +396,7 @@ const CourseDetail = () => {
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [currentLessonProgress, setCurrentLessonProgress] = useState(0);
+  const [isExerciseOpen, setIsExerciseOpen] = useState(false);
   
   // If course doesn't exist, show not found message
   if (!course) {
@@ -466,7 +468,7 @@ const CourseDetail = () => {
         toast({
           title: "Exercise Completed!",
           description: "You've successfully completed this exercise.",
-          variant: "default", // Changed from "success" to "default"
+          variant: "default",
         });
       } else {
         setOutput(prev => prev + "✗ Your solution doesn't match the expected output. Try again!\n");
@@ -485,6 +487,9 @@ const CourseDetail = () => {
       setCode(activeLessonData.initialCode || "");
       setOutput("");
       setCurrentLessonProgress(0);
+      setIsExerciseOpen(true);
+    } else {
+      setIsExerciseOpen(false);
     }
   }, [activeLesson, activeModule, activeLessonData]);
   
@@ -544,13 +549,13 @@ const CourseDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Sidebar with modules and lessons */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-4">
                 <div className="p-4 border-b border-gray-100">
                   <h2 className="font-semibold text-lua-darkPurple">Course Content</h2>
                   <p className="text-sm text-gray-500">{course.lessonsCount} lessons</p>
                 </div>
                 
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto">
                   {course.modules.map((module, moduleIndex) => (
                     <div key={module.id}>
                       <div 
@@ -617,76 +622,85 @@ const CourseDetail = () => {
                 </div>
                 
                 <CardContent className="p-0">
-                  <Tabs defaultValue="lesson" className="w-full">
-                    <TabsList className="w-full justify-start rounded-none border-b">
-                      <TabsTrigger value="lesson">Lesson</TabsTrigger>
-                      {activeLessonData.type === "exercise" && (
-                        <TabsTrigger value="exercise">Exercise</TabsTrigger>
-                      )}
-                    </TabsList>
-                    
-                    <TabsContent value="lesson" className="p-6">
-                      <div className="prose max-w-none">
-                        {activeLessonData.content}
+                  {/* Integrated lesson content and exercise */}
+                  <div className="p-6">
+                    {/* Render content with better formatting */}
+                    <div className="prose prose-slate max-w-none">
+                      <div dangerouslySetInnerHTML={{ 
+                        __html: activeLessonData.content
+                          .replace(/# (.*)/g, '<h1 class="text-2xl font-bold text-lua-darkPurple mt-6 mb-4">$1</h1>')
+                          .replace(/## (.*)/g, '<h2 class="text-xl font-bold text-lua-purple mt-5 mb-3">$1</h2>')
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/```lua([\s\S]*?)```/g, '<pre class="bg-gray-800 text-white p-4 rounded-md my-4 overflow-x-auto"><code>$1</code></pre>')
+                          .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-md my-4 overflow-x-auto"><code>$1</code></pre>')
+                          .replace(/\`(.*?)\`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">$1</code>')
+                          .replace(/\n\n/g, '<br/><br/>')
+                      }} />
+                    </div>
+                  </div>
+                  
+                  {/* Exercise section (always visible for exercises) */}
+                  {activeLessonData.type === "exercise" && (
+                    <div className="border-t border-gray-200 mt-4">
+                      <div className="p-4 bg-gray-50">
+                        <h3 className="font-semibold text-lua-purple mb-2">Practice Exercise</h3>
+                        <p className="text-sm text-gray-600 mb-4">Write your code below and test it using the Run and Submit buttons.</p>
                       </div>
-                    </TabsContent>
-                    
-                    {activeLessonData.type === "exercise" && (
-                      <TabsContent value="exercise" className="p-0">
-                        <div className="grid grid-cols-1 lg:grid-cols-2">
-                          {/* Code editor */}
-                          <div className="border-r border-gray-200">
-                            <div className="border-b border-gray-200 bg-gray-100 px-4 py-2 flex justify-between items-center">
-                              <div className="flex space-x-1">
-                                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                              </div>
-                              <span className="text-sm text-gray-500">main.lua</span>
-                              <div></div>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2">
+                        {/* Code editor */}
+                        <div className="border-r border-gray-200">
+                          <div className="border-b border-gray-200 bg-gray-100 px-4 py-2 flex justify-between items-center">
+                            <div className="flex space-x-1">
+                              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                             </div>
-                            <Textarea
-                              value={code}
-                              onChange={(e) => setCode(e.target.value)}
-                              className="w-full font-mono text-sm p-4 h-[400px] rounded-none border-0 focus:ring-0"
-                              spellCheck="false"
-                            />
-                            <div className="border-t border-gray-200 bg-gray-50 p-4 flex justify-between">
-                              <Button
-                                onClick={handleRunCode}
-                                className="bg-blue-500 hover:bg-blue-600 text-white"
-                              >
-                                <Play className="mr-1 h-4 w-4" /> Run
-                              </Button>
-                              <Button
-                                onClick={handleSubmitCode}
-                                className="bg-green-500 hover:bg-green-600 text-white"
-                              >
-                                <SendHorizontal className="mr-1 h-4 w-4" /> Submit
-                              </Button>
-                            </div>
+                            <span className="text-sm text-gray-500">main.lua</span>
+                            <div></div>
                           </div>
-                          
-                          {/* Output console */}
-                          <div className="bg-gray-900 text-white">
-                            <div className="border-b border-gray-700 px-4 py-2 bg-gray-800 flex justify-between items-center">
-                              <span className="text-sm text-gray-300">Console Output</span>
-                              <Button 
-                                variant="ghost" 
-                                className="h-7 px-2 text-xs text-gray-400 hover:text-white"
-                                onClick={() => setOutput("")}
-                              >
-                                Clear
-                              </Button>
-                            </div>
-                            <pre className="p-4 h-[451px] overflow-y-auto font-mono text-sm">
-                              {output || "// Run your code to see output here"}
-                            </pre>
+                          <Textarea
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="w-full font-mono text-sm p-4 h-[350px] rounded-none border-0 focus:ring-0"
+                            spellCheck="false"
+                          />
+                          <div className="border-t border-gray-200 bg-gray-50 p-4 flex justify-between">
+                            <Button
+                              onClick={handleRunCode}
+                              className="bg-blue-500 hover:bg-blue-600 text-white"
+                            >
+                              <Play className="mr-1 h-4 w-4" /> Run
+                            </Button>
+                            <Button
+                              onClick={handleSubmitCode}
+                              className="bg-green-500 hover:bg-green-600 text-white"
+                            >
+                              <SendHorizontal className="mr-1 h-4 w-4" /> Submit
+                            </Button>
                           </div>
                         </div>
-                      </TabsContent>
-                    )}
-                  </Tabs>
+                        
+                        {/* Output console */}
+                        <div className="bg-gray-900 text-white">
+                          <div className="border-b border-gray-700 px-4 py-2 bg-gray-800 flex justify-between items-center">
+                            <span className="text-sm text-gray-300">Console Output</span>
+                            <Button 
+                              variant="ghost" 
+                              className="h-7 px-2 text-xs text-gray-400 hover:text-white"
+                              onClick={() => setOutput("")}
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                          <pre className="p-4 h-[401px] overflow-y-auto font-mono text-sm">
+                            {output || "// Run your code to see output here"}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
                 
                 <div className="p-6 border-t border-gray-100 flex justify-between">
