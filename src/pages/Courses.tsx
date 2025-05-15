@@ -80,6 +80,78 @@ const allCourses = [
     lessonsCount: 11,
     progress: 0,
     category: "practical"
+  },
+  {
+    id: "lua-network",
+    title: "Network Programming in Lua",
+    description: "Learn how to create networked applications using Lua and its socket libraries.",
+    level: "Advanced",
+    lessonsCount: 9,
+    progress: 0,
+    category: "advanced"
+  },
+  {
+    id: "lua-embedded-systems",
+    title: "Lua for Embedded Systems",
+    description: "Apply Lua in resource-constrained environments and IoT devices.",
+    level: "Advanced",
+    lessonsCount: 8,
+    progress: 0,
+    category: "practical"
+  },
+  {
+    id: "lua-web-frameworks",
+    title: "Web Frameworks with Lua",
+    description: "Build web applications using Lua frameworks like Lapis and OpenResty.",
+    level: "Intermediate",
+    lessonsCount: 11,
+    progress: 0,
+    category: "practical"
+  },
+  {
+    id: "lua-data-science",
+    title: "Data Analysis with Lua",
+    description: "Process and analyze data using Lua's libraries and tools.",
+    level: "Intermediate",
+    lessonsCount: 10,
+    progress: 0,
+    category: "practical"
+  },
+  {
+    id: "lua-game-engines",
+    title: "Creating Game Engines with Lua",
+    description: "Build your own 2D game engine from scratch using Lua.",
+    level: "Advanced",
+    lessonsCount: 16,
+    progress: 0,
+    category: "gamedev"
+  },
+  {
+    id: "lua-ai-ml",
+    title: "AI and Machine Learning in Lua",
+    description: "Implement basic machine learning algorithms and AI techniques using Lua.",
+    level: "Advanced",
+    lessonsCount: 13,
+    progress: 0,
+    category: "advanced"
+  },
+  {
+    id: "lua-for-audio",
+    title: "Audio Processing with Lua",
+    description: "Create tools for sound generation, analysis and processing using Lua.",
+    level: "Intermediate",
+    lessonsCount: 9,
+    progress: 0,
+    category: "practical"
+  },
+  {
+    id: "lua-design-patterns",
+    title: "Design Patterns in Lua",
+    description: "Apply software design patterns effectively in Lua programming.",
+    level: "Advanced",
+    lessonsCount: 12,
+    progress: 0,
+    category: "advanced"
   }
 ];
 

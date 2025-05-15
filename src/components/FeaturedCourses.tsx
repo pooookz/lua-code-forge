@@ -37,10 +37,45 @@ const coursesData = [
     level: "Beginner",
     lessonsCount: 14,
     progress: 0
+  },
+  {
+    id: "lua-network",
+    title: "Network Programming in Lua",
+    description: "Learn how to create networked applications using Lua and its socket libraries.",
+    level: "Advanced",
+    lessonsCount: 9,
+    progress: 0
+  },
+  {
+    id: "lua-embedded-systems",
+    title: "Lua for Embedded Systems",
+    description: "Apply Lua in resource-constrained environments and IoT devices.",
+    level: "Advanced",
+    lessonsCount: 8,
+    progress: 0
+  },
+  {
+    id: "lua-web-frameworks",
+    title: "Web Frameworks with Lua",
+    description: "Build web applications using Lua frameworks like Lapis and OpenResty.",
+    level: "Intermediate",
+    lessonsCount: 11,
+    progress: 0
+  },
+  {
+    id: "lua-data-science",
+    title: "Data Analysis with Lua",
+    description: "Process and analyze data using Lua's libraries and tools.",
+    level: "Intermediate",
+    lessonsCount: 10,
+    progress: 0
   }
 ];
 
 const FeaturedCourses = () => {
+  // We'll display only the first 4 courses in the featured section
+  const featuredCourses = coursesData.slice(0, 4);
+  
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -57,7 +92,7 @@ const FeaturedCourses = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {coursesData.map((course) => (
+          {featuredCourses.map((course) => (
             <CourseCard
               key={course.id}
               id={course.id}
