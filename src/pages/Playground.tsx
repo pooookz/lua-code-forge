@@ -183,7 +183,7 @@ print(count()) -- 3`
                   <SelectValue placeholder="Select example" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="choose">Choose example</SelectItem>
+                  {/* Fixed: Removed the SelectItem with empty value */}
                   <SelectItem value="hello">Hello World</SelectItem>
                   <SelectItem value="tables">Tables</SelectItem>
                   <SelectItem value="functions">Functions</SelectItem>
