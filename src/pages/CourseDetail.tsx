@@ -8,92 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCheck, Play, SendHorizontal } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-
-// Sample course data - in a real app this would come from an API
-const coursesData = {
-  "lua-basics": {
-    title: "Lua Basics",
-    description: "Learn the fundamentals of Lua programming, including variables, functions, loops, and tables.",
-    level: "Beginner",
-    lessonsCount: 12,
-    totalExercises: 36,
-    completedExercises: 0,
-    modules: [
-      {
-        id: "intro",
-        title: "Introduction to Lua",
-        description: "Get started with Lua programming language and understand its core concepts.",
-        lessons: [
-          {
-            id: "what-is-lua",
-            title: "What is Lua?",
-            type: "reading",
-            content: `# Introduction to Lua
-            
-Lua is a powerful, efficient, lightweight, embeddable scripting language. It supports procedural programming, object-oriented programming, functional programming, data-driven programming, and data description.
-
-## History and Purpose
-
-Lua was created in 1993 by Roberto Ierusalimschy, Luiz Henrique de Figueiredo, and Waldemar Celes at the Pontifical Catholic University of Rio de Janeiro, Brazil. The name "Lua" means "moon" in Portuguese.
-
-Lua was designed to be:
-- **Embeddable**: Easily integrated into applications
-- **Lightweight**: Small footprint and fast execution
-- **Extensible**: Can be extended with C functions
-- **Simple**: Clean syntax with few concepts
-
-## Where Lua is Used
-
-Lua is widely used in:
-- **Game Development**: World of Warcraft, Angry Birds, Roblox
-- **Embedded Systems**: Internet of Things (IoT) devices
-- **Web Applications**: Used in Nginx and Apache for scripting
-- **Scientific Computing**: Data analysis and visualization
-- **Adobe Lightroom**: Extension scripts
-- **Wireshark**: Protocol analyzers
-
-Let's start by understanding the basic syntax and structure of Lua programs.`
-          },
-          {
-            id: "hello-world",
-            title: "Hello World",
-            type: "exercise",
-            content: `# Your First Lua Program
-
-Let's write our first Lua program - the classic "Hello World".
-
-In Lua, we use the \`print\` function to output text to the console.
-
-## Task
-
-Write a Lua program that prints "Hello, Lua World!" to the console.
-
-## Example Code
-
-\`\`\`lua
--- This is a comment in Lua
-print("Hello, Lua World!")
-\`\`\`
-
-## Exercise
-
-Now, modify the code to print both "Hello, Lua World!" and "I am learning Lua!" on separate lines.
-
-Use the Run button to test your code and Submit when you're ready.`,
-            initialCode: "-- Write your Lua code here\n",
-            solution: `-- Write your Lua code here
-print("Hello, Lua World!")
-print("I am learning Lua!")`
-          }
-        ]
-      }
-    ]
-  }
-};
+import { courseContent } from "@/data/coursesData";
 
 const CourseDetail = () => {
   const { courseId } = useParams();
-  const course = coursesData[courseId as keyof typeof coursesData];
+  const course = courseContent[courseId as keyof typeof courseContent];
   
   const [activeModule, setActiveModule] = useState(0);
   const [activeLesson, setActiveLesson] = useState(0);
@@ -133,12 +52,25 @@ const CourseDetail = () => {
       let simulatedOutput = "-- Output: --\n";
       
       if (code.includes("print(")) {
-        const printMatches = code.match(/print\(["'](.*)["']\)/g);
+        const printMatches = code.match(/print\((.*)\)/g);
         if (printMatches) {
           printMatches.forEach(match => {
-            const content = match.match(/print\(["'](.*)["']\)/);
+            const content = match.match(/print\((.*)\)/);
             if (content && content[1]) {
-              simulatedOutput += content[1] + "\n";
+              // Handle string literals and concatenation
+              const parts = content[1].split("..");
+              const output = parts.map(part => {
+                part = part.trim();
+                if (part.startsWith('"') || part.startsWith("'")) {
+                  return part.slice(1, -1);
+                }
+                // Handle variables (simplified)
+                if (part === "age") return "25";
+                if (part === "name") return "John";
+                if (part === "isStudent") return "true";
+                return part;
+              }).join("");
+              simulatedOutput += output + "\n";
             }
           });
         }
@@ -154,13 +86,28 @@ const CourseDetail = () => {
   };
   
   const handleSubmitCode = () => {
-    // In a real app, this would validate the code against the expected solution
+    if (!activeLessonData.solution) {
+      toast({
+        title: "No Solution Available",
+        description: "This lesson doesn't require code submission.",
+        variant: "default",
+      });
+      return;
+    }
+
     setOutput("Evaluating submission...\n\n");
     
     setTimeout(() => {
-      // Compare with the actual solution
-      const normalizedCode = code.trim().replace(/\s+/g, ' ');
-      const normalizedSolution = activeLessonData.solution.trim().replace(/\s+/g, ' ');
+      // Normalize both code and solution for comparison
+      const normalizedCode = code.trim()
+        .replace(/\s+/g, ' ')
+        .replace(/["']/g, '"') // Standardize quotes
+        .toLowerCase();
+      
+      const normalizedSolution = activeLessonData.solution.trim()
+        .replace(/\s+/g, ' ')
+        .replace(/["']/g, '"')
+        .toLowerCase();
       
       if (normalizedCode === normalizedSolution) {
         setOutput(prev => prev + "✓ Great job! Your solution is correct.\n");
@@ -221,8 +168,8 @@ const CourseDetail = () => {
         </div>
 
         {/* Main content area */}
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex gap-6">
+        <div className="container mx-auto px-4">
+          <div className="flex gap-6 py-6">
             {/* Left sidebar - Module navigation */}
             <div className="w-64 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-4">
@@ -267,11 +214,11 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            {/* Main content and code editor */}
-            <div className="flex-grow">
+            {/* Main content area */}
+            <div className="flex-grow min-h-[calc(100vh-16rem)]">
               <div className="grid grid-cols-2 gap-6">
                 {/* Left column - Lesson content */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-6 h-[calc(100vh-16rem)] overflow-y-auto">
                   <div className="prose prose-slate max-w-none">
                     <div dangerouslySetInnerHTML={{ 
                       __html: activeLessonData.content
@@ -289,10 +236,10 @@ const CourseDetail = () => {
 
                 {/* Right column - Code editor and output */}
                 {activeLessonData.type === "exercise" && (
-                  <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                  <div className="bg-white rounded-lg shadow-sm overflow-hidden h-[calc(100vh-16rem)] flex flex-col">
                     {/* Code editor */}
-                    <div className="border-b border-gray-200">
-                      <div className="bg-gray-100 px-4 py-2 flex justify-between items-center">
+                    <div className="flex-grow flex flex-col">
+                      <div className="bg-gray-100 px-4 py-2 flex justify-between items-center border-b border-gray-200">
                         <div className="flex space-x-1">
                           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                           <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
@@ -303,13 +250,13 @@ const CourseDetail = () => {
                       <Textarea
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        className="w-full font-mono text-sm p-4 h-[200px] rounded-none border-0 focus:ring-0"
+                        className="flex-grow font-mono text-sm p-4 rounded-none border-0 focus:ring-0 resize-none"
                         spellCheck="false"
                       />
                     </div>
 
                     {/* Output console */}
-                    <div className="h-[200px] bg-gray-900 text-white">
+                    <div className="h-48 bg-gray-900 text-white">
                       <div className="border-b border-gray-700 px-4 py-2 bg-gray-800 flex justify-between items-center">
                         <span className="text-sm text-gray-300">Console Output</span>
                         <Button 
@@ -320,7 +267,7 @@ const CourseDetail = () => {
                           Clear
                         </Button>
                       </div>
-                      <pre className="p-4 h-[152px] overflow-y-auto font-mono text-sm">
+                      <pre className="p-4 h-[136px] overflow-y-auto font-mono text-sm">
                         {output || "// Run your code to see output here"}
                       </pre>
                     </div>
