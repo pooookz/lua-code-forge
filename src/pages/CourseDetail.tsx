@@ -9,10 +9,11 @@ import CourseHeader from "@/components/course/CourseHeader";
 import CourseSidebar from "@/components/course/CourseSidebar";
 import LessonContent from "@/components/course/LessonContent";
 import CodeEditor from "@/components/course/CodeEditor";
+import { Module, Lesson, CourseDetail as CourseDetailType } from "@/types/course";
 
 const CourseDetail = () => {
   const { courseId } = useParams();
-  const course = courseContent[courseId as keyof typeof courseContent];
+  const course = courseContent[courseId as keyof typeof courseContent] as CourseDetailType;
   
   const [activeModule, setActiveModule] = useState(0);
   const [activeLesson, setActiveLesson] = useState(0);
@@ -43,7 +44,7 @@ const CourseDetail = () => {
   }
   
   const activeModuleData = course.modules[activeModule];
-  const activeLessonData = activeModuleData?.lessons[activeLesson];
+  const activeLessonData = activeModuleData?.lessons[activeLesson] as Lesson;
   
   const handleLessonCompleted = () => {
     const lessonId = `${activeModuleData.id}-${activeLessonData.id}`;
@@ -93,7 +94,7 @@ const CourseDetail = () => {
           <div className="flex gap-6 py-6">
             {/* Left sidebar - Module navigation */}
             <CourseSidebar 
-              modules={course.modules}
+              modules={course.modules} 
               activeModule={activeModule}
               activeLesson={activeLesson}
               setActiveModule={setActiveModule}

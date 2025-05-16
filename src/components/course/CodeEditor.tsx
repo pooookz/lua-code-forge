@@ -84,7 +84,9 @@ const CodeEditor = ({
         .toLowerCase();
       
       if (normalizedCode === normalizedSolution) {
-        setOutput(prev => prev + "✓ Great job! Your solution is correct.\n");
+        // Instead of using a callback, we'll create the new string directly
+        const newOutput = output + "✓ Great job! Your solution is correct.\n";
+        setOutput(newOutput);
         onCompleted();
         toast({
           title: "Exercise Completed!",
@@ -92,7 +94,9 @@ const CodeEditor = ({
           variant: "default",
         });
       } else {
-        setOutput(prev => prev + "✗ Your solution doesn't match the expected output. Try again!\n");
+        // Instead of using a callback, we'll create the new string directly
+        const newOutput = output + "✗ Your solution doesn't match the expected output. Try again!\n";
+        setOutput(newOutput);
         toast({
           title: "Not Quite Right",
           description: "Your solution doesn't match what we're looking for. Check the hints and try again.",
