@@ -1,76 +1,87 @@
 
-import { Progress } from "@/components/ui/progress";
 import { CourseDetail } from "@/types/course";
-import { Clock, Star, User } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Award, Book, Clock, User, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface CourseHeaderProps {
   course: CourseDetail;
   currentLessonProgress: number;
+  overallProgress: number;
 }
 
-const CourseHeader = ({ course, currentLessonProgress }: CourseHeaderProps) => {
+const CourseHeader = ({ 
+  course, 
+  currentLessonProgress, 
+  overallProgress 
+}: CourseHeaderProps) => {
+  const [showDetails, setShowDetails] = useState(false);
+  
   return (
     <div className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-lua-darkPurple">{course.title}</h1>
-            <div className="flex flex-wrap items-center gap-4 mt-2">
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                course.level === "Beginner" ? "bg-green-100 text-green-800" : 
-                course.level === "Intermediate" ? "bg-blue-100 text-blue-800" : 
-                "bg-purple-100 text-purple-800"
-              }`}>
-                {course.level}
-              </span>
-              <span className="text-sm text-gray-500">{course.lessonsCount} lessons</span>
-              
-              {course.rating && (
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-4 w-4 ${
-                        star <= Math.floor(course.rating || 0)
-                          ? "text-yellow-500 fill-yellow-500"
-                          : star <= (course.rating || 0)
-                          ? "text-yellow-500 fill-yellow-500 opacity-60"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-1 text-sm font-medium">{course.rating.toFixed(1)}</span>
-                </div>
+            <h1 className="text-2xl font-bold text-lua-darkPurple">{course.title}</h1>
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600">
+              {course.level && (
+                <span className="flex items-center">
+                  <Award className="w-4 h-4 mr-1" />
+                  {course.level}
+                </span>
               )}
-              
-              {course.author && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <User className="h-4 w-4 mr-1" />
-                  <span>Instructor: {course.author}</span>
-                </div>
+              {course.lessonsCount && (
+                <span className="flex items-center">
+                  <Book className="w-4 h-4 mr-1" />
+                  {course.lessonsCount} lessons
+                </span>
               )}
-              
               {course.duration && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="h-4 w-4 mr-1" />
-                  <span>{course.duration}</span>
-                </div>
+                <span className="flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {course.duration}
+                </span>
+              )}
+              {course.enrolledStudents && (
+                <span className="flex items-center">
+                  <User className="w-4 h-4 mr-1" />
+                  {course.enrolledStudents.toLocaleString()} students
+                </span>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Course Progress:</span>
-            <Progress value={currentLessonProgress} className="w-32 h-2" />
-            <span className="text-sm font-medium">{currentLessonProgress}%</span>
+          
+          <div className="flex mt-4 md:mt-0">
+            <Button variant="outline" onClick={() => setShowDetails(!showDetails)}>
+              Course Details
+              <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+            </Button>
           </div>
         </div>
         
-        {(course.prerequisites?.length > 0 || course.skills?.length > 0) && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {course.prerequisites?.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-2 items-center">
+          <div className="w-full flex-grow">
+            <Progress value={overallProgress} className="h-2" />
+          </div>
+          <div className="text-sm text-gray-600 whitespace-nowrap">
+            Overall progress: <span className="font-semibold">{overallProgress}%</span>
+          </div>
+        </div>
+        
+        {showDetails && (
+          <div className="mt-6 bg-gray-50 p-4 rounded-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+            {course.description && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Prerequisites:</h3>
-                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <h3 className="font-medium text-gray-800 mb-2">Description</h3>
+                <p className="text-sm text-gray-600">{course.description}</p>
+              </div>
+            )}
+            
+            {course.prerequisites && course.prerequisites.length > 0 && (
+              <div>
+                <h3 className="font-medium text-gray-800 mb-2">Prerequisites</h3>
+                <ul className="text-sm text-gray-600 list-disc list-inside">
                   {course.prerequisites.map((prereq, index) => (
                     <li key={index}>{prereq}</li>
                   ))}
@@ -78,14 +89,16 @@ const CourseHeader = ({ course, currentLessonProgress }: CourseHeaderProps) => {
               </div>
             )}
             
-            {course.skills?.length > 0 && (
+            {course.skills && course.skills.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">What you'll learn:</h3>
-                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <h3 className="font-medium text-gray-800 mb-2">Skills You'll Learn</h3>
+                <div className="flex flex-wrap gap-2">
                   {course.skills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
+                    <span key={index} className="inline-block bg-lua-purple/10 text-lua-purple text-xs px-2 py-1 rounded">
+                      {skill}
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
