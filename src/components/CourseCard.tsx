@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Book } from "lucide-react";
+import { ArrowRight, Book, Clock, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface CourseCardProps {
@@ -14,6 +14,9 @@ interface CourseCardProps {
   lessonsCount: number;
   progress?: number;
   image?: string;
+  author?: string;
+  duration?: string;
+  rating?: number;
 }
 
 const CourseCard = ({
@@ -24,6 +27,9 @@ const CourseCard = ({
   lessonsCount,
   progress = 0,
   image,
+  author,
+  duration,
+  rating,
 }: CourseCardProps) => {
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -39,7 +45,7 @@ const CourseCard = ({
   };
 
   return (
-    <Card className="overflow-hidden border-gray-200 hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
+    <Card className="overflow-hidden border-gray-200 hover:shadow-md transition-all duration-300 transform hover:translate-y-[-5px] h-full flex flex-col">
       <div className="relative h-40 bg-gradient-to-r from-lua-darkPurple to-lua-purple flex items-center justify-center">
         {image ? (
           <img
@@ -59,7 +65,44 @@ const CourseCard = ({
         <h3 className="text-xl font-bold mt-2 text-lua-darkPurple">{title}</h3>
       </CardHeader>
       <CardContent className="pb-4 flex-grow">
-        <p className="text-gray-600 text-sm">{description}</p>
+        <p className="text-gray-600 text-sm line-clamp-3">{description}</p>
+        
+        {/* Author, Duration and Rating info */}
+        <div className="mt-4 space-y-2">
+          {author && (
+            <div className="flex items-center text-sm text-gray-500">
+              <span className="font-medium">By {author}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between">
+            {duration && (
+              <div className="flex items-center text-sm text-gray-500">
+                <Clock className="h-4 w-4 mr-1" />
+                <span>{duration}</span>
+              </div>
+            )}
+            
+            {rating && (
+              <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-4 w-4 ${
+                      star <= Math.floor(rating)
+                        ? "text-yellow-500 fill-yellow-500"
+                        : star <= rating
+                        ? "text-yellow-500 fill-yellow-500 opacity-60"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+                <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
         {progress > 0 && (
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-1">

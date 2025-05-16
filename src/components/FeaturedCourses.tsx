@@ -1,91 +1,23 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import CourseCard from "./CourseCard";
 import { Link } from "react-router-dom";
-
-// Sample course data
-const coursesData = [
-  {
-    id: "lua-basics",
-    title: "Lua Basics",
-    description: "Learn the fundamentals of Lua programming, including variables, functions, loops, and tables.",
-    level: "Beginner",
-    lessonsCount: 12,
-    progress: 0
-  },
-  {
-    id: "game-dev-lua",
-    title: "Game Development with Lua",
-    description: "Build 2D games using Lua with the LÖVE framework. Learn game loops, physics, and collision detection.",
-    level: "Intermediate",
-    lessonsCount: 15,
-    progress: 0
-  },
-  {
-    id: "lua-oop",
-    title: "Object-Oriented Programming in Lua",
-    description: "Master the concepts of OOP in Lua with metatables, inheritance, and class-like structures.",
-    level: "Intermediate",
-    lessonsCount: 10,
-    progress: 0
-  },
-  {
-    id: "lua-for-roblox",
-    title: "Lua for Roblox",
-    description: "Create interactive games on the Roblox platform using Lua scripting.",
-    level: "Beginner",
-    lessonsCount: 14,
-    progress: 0
-  },
-  {
-    id: "lua-network",
-    title: "Network Programming in Lua",
-    description: "Learn how to create networked applications using Lua and its socket libraries.",
-    level: "Advanced",
-    lessonsCount: 9,
-    progress: 0
-  },
-  {
-    id: "lua-embedded-systems",
-    title: "Lua for Embedded Systems",
-    description: "Apply Lua in resource-constrained environments and IoT devices.",
-    level: "Advanced",
-    lessonsCount: 8,
-    progress: 0
-  },
-  {
-    id: "lua-web-frameworks",
-    title: "Web Frameworks with Lua",
-    description: "Build web applications using Lua frameworks like Lapis and OpenResty.",
-    level: "Intermediate",
-    lessonsCount: 11,
-    progress: 0
-  },
-  {
-    id: "lua-data-science",
-    title: "Data Analysis with Lua",
-    description: "Process and analyze data using Lua's libraries and tools.",
-    level: "Intermediate",
-    lessonsCount: 10,
-    progress: 0
-  }
-];
+import { allCourses } from "@/data/coursesData";
 
 const FeaturedCourses = () => {
   // We'll display only the first 4 courses in the featured section
-  const featuredCourses = coursesData.slice(0, 4);
+  const featuredCourses = allCourses.slice(0, 4);
   
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-10 gap-4">
           <div>
             <h2 className="text-3xl font-bold text-lua-darkPurple">Featured Courses</h2>
-            <p className="text-gray-600 mt-2">Begin your Lua programming journey with these popular courses</p>
+            <p className="text-gray-600 mt-2 max-w-2xl">Begin your Lua programming journey with these expertly curated courses, designed to take you from beginner to professional.</p>
           </div>
           <Link to="/courses">
-            <Button variant="outline" className="border-lua-purple text-lua-purple hover:bg-lua-purple hover:text-white">
+            <Button variant="outline" className="border-lua-purple text-lua-purple hover:bg-lua-purple hover:text-white whitespace-nowrap">
               View All Courses
             </Button>
           </Link>
@@ -101,6 +33,10 @@ const FeaturedCourses = () => {
               level={course.level as "Beginner" | "Intermediate" | "Advanced"}
               lessonsCount={course.lessonsCount}
               progress={course.progress}
+              image={course.imageUrl}
+              author={course.author}
+              duration={course.duration}
+              rating={course.rating}
             />
           ))}
         </div>
