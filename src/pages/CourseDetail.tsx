@@ -12,7 +12,7 @@ import CodeEditor from "@/components/course/CodeEditor";
 import CourseCertificate from "@/components/course/CourseCertificate";
 import { Module, Lesson, CourseDetail as CourseDetailType } from "@/types/course";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Award } from "lucide-react";
+import { ChevronLeft, ChevronRight, Award, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -262,7 +262,7 @@ const CourseDetail = () => {
                                   )}
                                   {completedLessons.includes(`${activeModuleData.id}-${activeLessonData.id}`) && (
                                     <div className="mt-8 flex items-center text-green-600">
-                                      <CheckCircle2 className="mr-2" />
+                                      <CheckCircle className="mr-2" />
                                       <span>Lesson Completed</span>
                                     </div>
                                   )}

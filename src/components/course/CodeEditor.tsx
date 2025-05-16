@@ -137,8 +137,7 @@ const CodeEditor = ({
       const allPassed = tests.every(test => test.passed);
       
       if (allPassed) {
-        const newOutput = output + "✓ Great job! Your solution is correct.\n";
-        setOutput(newOutput);
+        setOutput(output + "✓ Great job! Your solution is correct.\n");
         onCompleted();
         toast({
           title: "Exercise Completed!",
@@ -149,8 +148,7 @@ const CodeEditor = ({
         // Switch to tests tab to show success
         setActiveTab("tests");
       } else {
-        const newOutput = output + "✗ Your solution doesn't match the expected output. Try again!\n";
-        setOutput(newOutput);
+        setOutput(output + "✗ Your solution doesn't match the expected output. Try again!\n");
         toast({
           title: "Not Quite Right",
           description: "Your solution doesn't match what we're looking for. Check the hints and try again.",
