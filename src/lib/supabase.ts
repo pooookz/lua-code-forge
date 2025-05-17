@@ -2,14 +2,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and anon key must be defined');
-}
+const supabaseUrl = "https://cigkcvkhujjadboowrxh.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpZ2tjdmtodWpqYWRib293cnhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0MzcxMDgsImV4cCI6MjA2MzAxMzEwOH0.eKA3YPPqZiN0eAmXgOfnxuUzVRtkaAmAri0uZnWlBDQ";
 
 export const supabase = createClient<Database>(
   supabaseUrl,
-  supabaseKey
+  supabaseKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
+    }
+  }
 );
