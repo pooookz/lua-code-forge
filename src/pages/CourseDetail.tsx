@@ -1,21 +1,27 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "@/hooks/use-toast";
-import { courseContent } from "@/data/coursesData";
 import CourseHeader from "@/components/course/CourseHeader";
 import CourseSidebar from "@/components/course/CourseSidebar";
 import CourseNavigation from "@/components/course/CourseNavigation";
 import TabsContainer from "@/components/course/TabsContainer";
 import CourseNotFound from "@/components/course/CourseNotFound";
 import CourseCertificateView from "@/components/course/CourseCertificateView";
-import { Module, Lesson, CourseDetail as CourseDetailType } from "@/types/course";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProgress, useCourseDetails, useUpdateUserProgress } from "@/hooks/use-courses";
+import { Button } from "@/components/ui/button";
 
 const CourseDetail = () => {
   const { courseId } = useParams();
-  const course = courseContent[courseId as keyof typeof courseContent] as CourseDetailType;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const { data: course, isLoading: courseLoading, error: courseError } = useCourseDetails(courseId);
+  const { data: userProgress, isLoading: progressLoading } = useUserProgress(user?.id, courseId);
+  const updateUserProgress = useUpdateUserProgress();
   
   // State for tracking course progress
   const [activeModule, setActiveModule] = useState(0);
@@ -28,13 +34,65 @@ const CourseDetail = () => {
   const [courseCompleted, setCourseCompleted] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
   
-  // If course doesn't exist, show not found message
-  if (!course) {
+  // Initialize state from user progress data
+  useEffect(() => {
+    if (userProgress && !progressLoading) {
+      setCompletedLessons(userProgress.completedLessons || []);
+      setActiveModule(userProgress.lastAccessedModule || 0);
+      setActiveLesson(userProgress.lastAccessedLesson || 0);
+      setCourseCompleted(userProgress.certificateEarned || false);
+    }
+  }, [userProgress, progressLoading]);
+  
+  // If user is not logged in, redirect to login
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-gray-50">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-3xl font-bold mb-4">Sign in to access this course</h1>
+            <p className="text-gray-600 mb-6">
+              Please sign in or create an account to view course content.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => navigate("/login")}>
+                Sign In
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/register")}>
+                Create Account
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
+  // Show loading state
+  if (courseLoading || progressLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-gray-50">
+          <div className="container mx-auto px-4 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-lua-purple border-r-transparent mb-4"></div>
+            <p className="text-gray-600">Loading course content...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
+  // If course doesn't exist or there's an error, show not found message
+  if (!course || courseError) {
     return <CourseNotFound />;
   }
   
-  const activeModuleData = course.modules[activeModule] as Module;
-  const activeLessonData = activeModuleData?.lessons[activeLesson] as Lesson;
+  const activeModuleData = course.modules[activeModule];
+  const activeLessonData = activeModuleData?.lessons[activeLesson];
   
   // Calculate overall course progress whenever completed lessons change
   useEffect(() => {
@@ -46,26 +104,45 @@ const CourseDetail = () => {
       // Check if course is completed
       if (progress === 100 && !courseCompleted) {
         setCourseCompleted(true);
+        updateUserProgress(user.id, courseId!, {
+          certificateEarned: true
+        });
         toast({
           title: "Congratulations!",
           description: "You've completed the entire course!",
         });
       }
     }
-  }, [completedLessons, course, courseCompleted]);
+  }, [completedLessons, course, courseCompleted, courseId, updateUserProgress, user?.id]);
   
-  const handleLessonCompleted = () => {
+  const handleLessonCompleted = async () => {
     const lessonId = `${activeModuleData.id}-${activeLessonData.id}`;
     
     if (!completedLessons.includes(lessonId)) {
-      setCompletedLessons([...completedLessons, lessonId]);
+      const updatedCompletedLessons = [...completedLessons, lessonId];
+      setCompletedLessons(updatedCompletedLessons);
       setCurrentLessonProgress(100);
       
-      // In a real app, you'd save this to a database or local storage
-      toast({
-        title: "Progress Saved",
-        description: "Lesson marked as completed.",
-      });
+      // Save progress to database
+      try {
+        await updateUserProgress(user.id, courseId!, {
+          completedLessons: updatedCompletedLessons,
+          lastAccessedModule: activeModule,
+          lastAccessedLesson: activeLesson
+        });
+        
+        toast({
+          title: "Progress Saved",
+          description: "Lesson marked as completed.",
+        });
+      } catch (error) {
+        console.error("Error updating progress:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save your progress.",
+          variant: "destructive"
+        });
+      }
     }
   };
   
@@ -82,7 +159,15 @@ const CourseDetail = () => {
         completedLessons.includes(`${activeModuleData.id}-${activeLessonData.id}`) ? 100 : 50
       );
     }
-  }, [activeLesson, activeModule, activeLessonData, activeModuleData, completedLessons]);
+    
+    // Update the last accessed lesson in database
+    if (user && courseId) {
+      updateUserProgress(user.id, courseId, {
+        lastAccessedModule: activeModule,
+        lastAccessedLesson: activeLesson
+      }).catch(error => console.error("Error updating last accessed lesson:", error));
+    }
+  }, [activeLesson, activeModule, activeLessonData, activeModuleData, completedLessons, courseId, updateUserProgress, user]);
   
   // Navigate to the next/previous lesson
   const navigateToNextLesson = () => {
@@ -128,13 +213,14 @@ const CourseDetail = () => {
           <div className="flex gap-6 py-6">
             {/* Left sidebar - Module navigation */}
             <CourseSidebar 
-              modules={course.modules as Module[]}
+              modules={course.modules}
               activeModule={activeModule}
               activeLesson={activeLesson}
               setActiveModule={setActiveModule}
               setActiveLesson={setActiveLesson}
               completedLessons={completedLessons}
               courseProgress={overallProgress}
+              userDisplayName={user?.email?.split('@')[0]}
             />
 
             {/* Main content area */}
