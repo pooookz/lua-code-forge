@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import AdminRoute from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -25,6 +26,9 @@ import Cookies from "./pages/Cookies";
 import Careers from "./pages/Careers";
 import Tutorials from "./pages/Tutorials";
 import Projects from "./pages/Projects";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +79,33 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/tutorials" element={<Tutorials />} />
             <Route path="/projects" element={<Projects />} />
+            
+            {/* New protected routes */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
